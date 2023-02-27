@@ -1,4 +1,5 @@
 extends Area2D
+signal hit
 
 
 # Declare member variables here. Examples:
@@ -12,7 +13,13 @@ var screen_size: Vector2
 func _ready():
 	# スクリーンのサイズを取得
 	screen_size = get_viewport_rect().size
+	# ゲーム開始時にプレイヤーが非表示になるようにする
+	hide()
 
+func start(pos):
+	position = pos
+	show()
+	$CollisionShape2D.disabled = false
 
 # 毎フレーム呼び出される
 # delta は [フレームの長さ - 前のフレームが完了するまでに要した時間]
@@ -52,3 +59,12 @@ func _process(delta):
 		$AnimatedSprite.animation = "up"
 		# yが正（下を向いている）なら、画像を上下反転させる
 		$AnimatedSprite.flip_v = velocity.y > 0
+
+# 敵に当たったというシグナルを受け取る
+func _on_Player_body_entered(body):
+	# プレイヤーが消える
+	hide()
+	# hit シグナルを発する
+	emit_signal("hit")
+	# 1回衝突したらプレイヤーの衝突を無効にする
+	$CollisionShape2D.set_deferred("disabled", true)
